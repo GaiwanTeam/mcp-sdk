@@ -1,0 +1,27 @@
+{
+  "configuration": {
+    "monitorInterval": 10,
+    "appenders": {
+      "Console": {
+        "name": "ConsoleAppender",
+        "PatternLayout": {
+          "pattern": "%d{HH:mm:ss.SSS} [%highlight{%5p}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=blue}] %style{%logger{36}}{magenta}: %msg%exception%n"
+        }
+      }
+    },
+    "loggers": {
+      "logger": [
+        {"name": "io.methvin.watcher", "level": "info"},
+        {"name": "org.eclipse.aether.internal", "level": "info"},
+        {"name": "org.apache.http.wire", "level": "info"},
+        {"name": "io.helidon", "level": "info"}
+      ],
+      "root": {
+        "level": "debug",
+        "appenderRef": {
+          "ref": "ConsoleAppender"
+        }
+      }
+    }
+  }
+}

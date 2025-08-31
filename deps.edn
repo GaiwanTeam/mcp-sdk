@@ -1,0 +1,31 @@
+{:paths ["src" "resources"]
+ :deps
+ {com.lambdaisland/config {:mvn/version "0.10.37"}
+  com.lambdaisland/makina {:mvn/version "0.2.12"}
+  com.lambdaisland/cli    {:mvn/version "0.24.97"}
+
+  ;; Logging
+  com.lambdaisland/log4j2                  {:mvn/version "0.2.6"}
+  io.helidon.logging/helidon-logging-log4j {:mvn/version "4.3.0-M1"}
+
+  ;; HTTP
+  com.s-exp/hirundo           {:mvn/version "0.1.43"}
+  metosin/reitit-ring         {:mvn/version "0.9.1"}
+  metosin/reitit-middleware   {:mvn/version "0.9.1"}
+  metosin/muuntaja            {:mvn/version "0.6.11"}
+  fi.metosin/muuntaja-charred {:mvn/version "0.6.11"}
+  metosin/reitit-malli        {:mvn/version "0.9.1"}
+
+  ;; Formats and utilities
+  com.cnuernber/charred {:mvn/version "1.037"}
+  io.helidon.webserver/helidon-webserver-sse {:mvn/version "4.3.0-M2"}}
+
+ :aliases
+ {:dev
+  {:extra-paths ["dev"]
+   :extra-deps  {org.clojure/tools.namespace {:mvn/version "1.5.0"}}}
+
+  :test
+  {:extra-paths ["test"]
+   :extra-deps  {org.clojure/tools.gitlibs {:mvn/version "2.6.206"}
+                 lambdaisland/kaocha       {:mvn/version "1.91.1392"}}}}}

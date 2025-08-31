@@ -1,0 +1,13 @@
+.cpcache
+.nrepl-port
+.shadow-cljs
+target
+out
+node_modules/
+.DS_Store
+.store
+.#*
+*.lock
+*.local
+*.local.*
+

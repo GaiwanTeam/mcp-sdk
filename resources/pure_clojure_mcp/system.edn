@@ -1,0 +1,6 @@
+{:system/http
+ {:port   #config :http/port
+  :router #makina/ref :system/router}
+
+ :system/router
+ {}}
