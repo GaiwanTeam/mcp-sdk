@@ -8,9 +8,7 @@
 (defn empty-response [request]
   (let [{:keys [id state session-id connection-id]} request]
     (if-let [{:keys [emit close]} (get-in @state [:sessions session-id :connections connection-id])]
-      (do
-        (log/info :CLOSING (str close))
-        (close))
+      (close)
       (log/warn :empty-res/failed {:session-id session-id :connection-id connection-id}))))
 
 (defn reply [request response]
@@ -67,16 +65,43 @@
   )
 
 (defmethod handle-request "tools/list" [{:keys [id state session-id params] :as req}]
-  (reply req (jsonrpc/response id {:tools []})))
+  (reply req
+         (jsonrpc/response
+          id
+          {:prompts
+           (into []
+                 (map #(assoc (dissoc (val %) :tool-fn) :name (key %)))
+                 (get @state :tools))})))
+
+(defmethod handle-request "tools/call" [{:keys [id state session-id params] :as req}]
+  (let [{:keys [name arguments]} params
+        {:keys [tool-fn]} (get-in @state [:tools name])]
+    (if tool-fn
+      (reply req (jsonrpc/response id (tool-fn arguments)))
+      (reply req (jsonrpc/error id {:code jsonrpc/invalid-params :message "Tool not found"}))))  )
 
 (defmethod handle-request "prompts/list" [{:keys [id state session-id params] :as req}]
-  (reply req (jsonrpc/response id {:prompts []})))
+  (reply
+   req
+   (jsonrpc/response
+    id
+    {:prompts
+     (into []
+           (map #(assoc (dissoc (val %) :messages-fn) :name (key %)))
+           (get @state :prompts))})))
+
+(defmethod handle-request "prompts/get" [{:keys [id state session-id params] :as req}]
+  (let [{:keys [name arguments]} params
+        {:keys [description messages-fn]} (get-in @state [:prompts name])]
+    (if messages-fn
+      (reply req (jsonrpc/response id {:description description
+                                       :messages (messages-fn arguments)}))
+      (reply req (jsonrpc/error id {:code jsonrpc/invalid-params :message "Prompt not found"})))))
 
 (defmethod handle-request "resources/list" [{:keys [id state session-id params] :as req}]
-  (let [resources  (into []
-                         (map #(assoc (val %) :uri (key %)))
-                         (get @state :resources))]
-    (log/info :resources/listing resources)
+  (let [resources (into []
+                        (map #(assoc (dissoc (val %) :load-fn) :uri (key %)))
+                        (get @state :resources))]
     (reply req
            (jsonrpc/response
             id
@@ -91,4 +116,5 @@
       (reply req
              (jsonrpc/response
               id
-              {:contents [(assoc res :uri uri :text (slurp uri))]})))))
+              {:contents [(assoc res :uri uri :text ((:load-fn res)))]}))
+      (reply req (jsonrpc/error id {:code jsonrpc/invalid-params :message "Resource not found"})))))

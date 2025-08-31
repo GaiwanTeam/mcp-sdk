@@ -38,11 +38,8 @@
        {:emit  #(.emit sink (map->SseEvent %))
         :close #(.close sink)})))
 
-(def cnt (atom 1000000))
-
 (defn upgrade-request [^ServerResponse server-response res]
   (let [{:keys [status headers]} res
-        i (swap! cnt inc)
         headers (cond-> headers
                   (not (res/find-header res "content-type"))
                   (assoc "content-type" "text/event-stream"))]
@@ -50,7 +47,6 @@
     (set-status! server-response status)
     (let [stream (.outputStream server-response)
           writer (OutputStreamWriter. stream)]
-      (log/warn :START i)
       ((:sse/start-stream res)
        {:emit
         (fn [{:keys [event data id comment]}]
@@ -66,7 +62,6 @@
               (.write writer (str "data: " d "\n"))))
           (.write writer "\n"))
         :close (fn []
-                 (log/warn :CLOSE i)
                  (.close writer)
                  (.close stream))}))))
 
