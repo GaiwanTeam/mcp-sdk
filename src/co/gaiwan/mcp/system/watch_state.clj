@@ -1,7 +1,7 @@
-(ns co.gaiwan.mcp.watch-state
+(ns co.gaiwan.mcp.system.watch-state
   (:require
    [co.gaiwan.mcp.protocol :as mcp]
-   [co.gaiwan.mcp.protocol :as state]))
+   [co.gaiwan.mcp.state :as state]))
 
 (defn watch [k r o n]
   (when (not= (:prompts o) (:prompts n))
@@ -20,5 +20,5 @@
                    :session-id sid
                    :method "notifications/tools/list_changed"}))))
 
-(defn init! []
+(defn component [_]
   (add-watch state/state ::notify-changes watch))

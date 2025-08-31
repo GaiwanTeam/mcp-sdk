@@ -1,0 +1,23 @@
+{
+  "configuration": {
+    "appenders": {
+      "File": {
+        "name": "FileAppender",
+        "fileName": "logs/cli.log",
+        "PatternLayout": {
+          "pattern": "%d{HH:mm:ss.SSS} [%highlight{%5p}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=blue}] %style{%logger{36}}{magenta}: %msg%exception%n"
+        }
+      }
+    },
+    "loggers": {
+      "logger": [
+      ],
+      "root": {
+        "level": "debug",
+        "appenderRef": {
+          "ref": "FileAppender"
+        }
+      }
+    }
+  }
+}

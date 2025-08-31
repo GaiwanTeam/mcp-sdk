@@ -1,4 +1,4 @@
-(ns co.gaiwan.pure-clojure-mcp.system.http
+(ns co.gaiwan.mcp.system.http
   "HTTP server component"
   (:require
    [lambdaisland.log4j2 :as log]
@@ -9,11 +9,11 @@
   (log/info :http/starting {:port (:port config)})
   {:server
    (hirundo/start!
-    {:http-handler/sse
+    {:port (:port config)
+     :http-handler/sse
      (reitit-ring/ring-handler
       (:router config)
-      (reitit-ring/create-default-handler))
-     :port         (:port config)})})
+      (reitit-ring/create-default-handler))})})
 
 (def component
   {:start start

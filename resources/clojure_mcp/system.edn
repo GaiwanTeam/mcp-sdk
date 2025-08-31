@@ -1,6 +1,6 @@
 {:system/http
  {:port   #config :http/port
   :router #makina/ref :system/router}
-
- :system/router
- {}}
+ :system/router {}
+ :system/stdio {}
+ :system/watch-state {}}

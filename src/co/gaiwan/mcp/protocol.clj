@@ -3,9 +3,17 @@
    [co.gaiwan.mcp.json-rpc :as jsonrpc]
    [lambdaisland.log4j2 :as log]))
 
+(defn default-conn [state session-id]
+  (get-in state [:sessions session-id :connections :default]))
+
+(defn find-conn [state session-id connection-id]
+  (or (get-in state [:sessions session-id :connections connection-id])
+      (default-conn state session-id)))
+
 (defn empty-response [request]
-  (let [{:keys [id state session-id connection-id]} request]
-    (if-let [{:keys [emit close]} (get-in @state [:sessions session-id :connections connection-id])]
+  (let [{:keys [id state session-id connection-id]} request
+        state @state]
+    (if-let [{:keys [emit close]} (find-conn state session-id connection-id)]
       (close)
       (log/warn :empty-res/failed {:session-id session-id :connection-id connection-id}))))
 
@@ -15,20 +23,20 @@
 (defn request [{:keys [state session-id method params callback]}]
   (let [id (swap! req-id-counter inc)]
     (swap! state assoc-in [:response-handlers id] callback)
-    (when-let [{:keys [emit]} (get-in @state [:sessions session-id :connections :default])]
+    (when-let [{:keys [emit]} (default-conn @state session-id)]
       (emit {:data (jsonrpc/request id method params)}))))
 
 (defn notify [{:keys [state session-id method params]}]
-  (when-let [{:keys [emit]} (get-in @state [:sessions session-id :connections :default])]
+  (when-let [{:keys [emit]} (default-conn @state session-id)]
     (emit {:data (if params
                    (jsonrpc/notification method params)
                    (jsonrpc/notification method))})))
 
 (defn reply [request response]
   (let [{:keys [id state session-id connection-id]} request]
-    (if-let [{:keys [emit close]} (get-in @state [:sessions session-id :connections connection-id])]
+    (if-let [{:keys [emit close]} (find-conn @state session-id connection-id)]
       (do
-        (emit {:data response :id id})
+        (emit {:data response})
         (close))
       (log/warn :jsonrpc/reply-failed {:request request :response response} :message "Missing connection"))))
 
@@ -62,6 +70,12 @@
           id
           {}))
   (swap-sess! req assoc :logging params))
+
+(defmethod handle-notification "notifications/initialized" [req]
+  ;; "params"
+  ;; {"requestId" "123",
+  ;;  "reason" "User requested cancellation"}
+  )
 
 (defmethod handle-notification "notifications/cancelled" [req]
   ;; "params"
@@ -104,6 +118,7 @@
       (reply req (jsonrpc/error id {:code jsonrpc/invalid-params :message "Prompt not found"})))))
 
 (defmethod handle-request "resources/list" [{:keys [id state session-id params] :as req}]
+  (log/debug :resources/list req)
   (let [resources (into []
                         (map #(assoc (dissoc (val %) :load-fn) :uri (key %)))
                         (get @state :resources))]

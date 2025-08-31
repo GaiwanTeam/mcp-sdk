@@ -7,17 +7,20 @@
    [co.gaiwan.mcp.config :as config]))
 
 (defn run-http
-  {:flags ["--port=<port>" {:key :http/port
+  {:doc "Run streaming HTTP MCP server"
+   :flags ["--port=<port>" {:key :http/port
                             :doc "Set the HTTP port"}]}
   [opts]
   (doseq [n (:require opts)]
     (require (symbol n)))
-  (config/start! [:system/http]))
+  (config/start! [:system/http :system/watch-state]))
 
-(defn run-stdio [_]
+(defn run-stdio
+  "Run STDIO based MCP server"
+  [opts]
   (doseq [n (:require opts)]
     (require (symbol n)))
-  (config/start! [:system/stdio]))
+  (config/start! [:system/stdio :system/watch-state]))
 
 (def commands
   ["http" #'run-http

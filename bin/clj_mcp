@@ -1,0 +1,7 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+cd $SCRIPT_DIR/..
+
+exec clojure -J-Dclojure.main.report=stderr -J-Dlog4j.configurationFile=resources/log4j2.cli.json -M -m co.gaiwan.mcp "$@"
