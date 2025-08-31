@@ -1,15 +1,28 @@
-(ns co.gaiwan.pure-clojure-mcp.mcp
+(ns co.gaiwan.mcp.protocol
   (:require
-   [co.gaiwan.pure-clojure-mcp.json-rpc :as jsonrpc]
+   [co.gaiwan.mcp.json-rpc :as jsonrpc]
    [lambdaisland.log4j2 :as log]))
-
-(def protocol-version "2025-06-18")
 
 (defn empty-response [request]
   (let [{:keys [id state session-id connection-id]} request]
     (if-let [{:keys [emit close]} (get-in @state [:sessions session-id :connections connection-id])]
       (close)
       (log/warn :empty-res/failed {:session-id session-id :connection-id connection-id}))))
+
+(defonce req-id-counter (atom 0))
+
+;; TODO: test this, and handle response
+(defn request [{:keys [state session-id method params callback]}]
+  (let [id (swap! req-id-counter inc)]
+    (swap! state assoc-in [:response-handlers id] callback)
+    (when-let [{:keys [emit]} (get-in @state [:sessions session-id :connections :default])]
+      (emit {:data (jsonrpc/request id method params)}))))
+
+(defn notify [{:keys [state session-id method params]}]
+  (when-let [{:keys [emit]} (get-in @state [:sessions session-id :connections :default])]
+    (emit {:data (if params
+                   (jsonrpc/notification method params)
+                   (jsonrpc/notification method))})))
 
 (defn reply [request response]
   (let [{:keys [id state session-id connection-id]} request]
@@ -31,25 +44,17 @@
   (let [{:keys [procolversion capabilities clientInfo]} params]
     (swap-sess! req assoc
                 :procolversion procolversion
-                :capabilities  capabilities
+                :capabilities capabilities
                 :clientInfo clientInfo)
-    (reply
-     req
-     (jsonrpc/response
-      id
-      {:protocolVersion protocol-version
-       :capabilities
-       {:logging {}
-        :prompts {:listChanged true}
-        :resources {:subscribe true
-                    :listChanged true}
-        :tools
-        {:listChanged true}}
-       :serverInfo
-       {:name "Pure"
-        :title "Pure Clojure MPC server"
-        :version "1.0.0"}
-       :instructions "Be nice"}))))
+    (let [{:keys [protocol-version capabilities server-info instructions]} @state]
+      (reply
+       req
+       (jsonrpc/response
+        id
+        {:protocolVersion protocol-version
+         :capabilities    capabilities
+         :serverInfo      server-info
+         :instructions    instructions})))))
 
 (defmethod handle-request "logging/setLevel" [{:keys [id state session-id params] :as req}]
   (reply req
@@ -68,7 +73,7 @@
   (reply req
          (jsonrpc/response
           id
-          {:prompts
+          {:tools
            (into []
                  (map #(assoc (dissoc (val %) :tool-fn) :name (key %)))
                  (get @state :tools))})))

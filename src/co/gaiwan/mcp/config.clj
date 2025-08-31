@@ -1,11 +1,11 @@
-(ns co.gaiwan.pure-clojure-mcp.config
+(ns co.gaiwan.mcp.config
   (:refer-clojure :exclude [get])
   (:require
    [lambdaisland.config :as config]
    [lambdaisland.config.cli :as config-cli]
    [lambdaisland.makina.app :as app]))
 
-(def prefix "pure_clojure_mcp")
+(def prefix "clojure_mcp")
 
 (defonce cli-opts (atom {}))
 
@@ -23,7 +23,7 @@
 (defonce system
   (app/create
    {:prefix prefix
-    :ns-prefix "co.gaiwan.pure-clojure-mcp"
+    :ns-prefix "co.gaiwan.mcp"
     :data-readers {'config get}}))
 
 (def load! (partial app/load! system))

@@ -9,8 +9,10 @@
   (log/info :http/starting {:port (:port config)})
   {:server
    (hirundo/start!
-    {:http-handler/sse (reitit-ring/ring-handler (:router config)
-                                                 (reitit-ring/create-default-handler))
+    {:http-handler/sse
+     (reitit-ring/ring-handler
+      (:router config)
+      (reitit-ring/create-default-handler))
      :port         (:port config)})})
 
 (def component

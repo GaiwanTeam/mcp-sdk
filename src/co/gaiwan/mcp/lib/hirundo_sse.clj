@@ -1,4 +1,4 @@
-(ns co.gaiwan.pure-clojure-mcp.lib.hirundo-sse
+(ns co.gaiwan.mcp.lib.hirundo-sse
   (:require
    [clojure.string :as str]
    [s-exp.hirundo.http.request :as request]

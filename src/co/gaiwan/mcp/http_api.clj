@@ -1,9 +1,9 @@
-(ns co.gaiwan.pure-clojure-mcp.api
+(ns co.gaiwan.mcp.http-api
   (:require
    [charred.api :as charred]
-   [co.gaiwan.pure-clojure-mcp.json-rpc :as json-rpc]
-   [co.gaiwan.pure-clojure-mcp.mcp :as mcp]
-   [co.gaiwan.pure-clojure-mcp.state :as state]
+   [co.gaiwan.mcp.json-rpc :as json-rpc]
+   [co.gaiwan.mcp.protocol :as mcp]
+   [co.gaiwan.mcp.state :as state]
    [lambdaisland.log4j2 :as log]))
 
 (defn- start-sse-stream [session-id conn-id]

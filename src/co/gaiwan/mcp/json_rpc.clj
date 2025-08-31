@@ -1,4 +1,4 @@
-(ns co.gaiwan.pure-clojure-mcp.json-rpc)
+(ns co.gaiwan.mcp.json-rpc)
 
 (def parse-error -32700)      ;; Parse error	 	Invalid JSON was received by the server.
 (def invalid-request -32600)  ;; Invalid Request 	The JSON sent is not a valid Request object.

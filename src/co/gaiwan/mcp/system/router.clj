@@ -1,8 +1,8 @@
-(ns co.gaiwan.pure-clojure-mcp.system.router
+(ns co.gaiwan.mcp.system.router
   "HTTP router and middleware setup"
   (:require
-   [co.gaiwan.pure-clojure-mcp.api :as api]
-   [co.gaiwan.pure-clojure-mcp.config :as config]
+   [co.gaiwan.mcp.config :as config]
+   [co.gaiwan.mcp.http-api :as api]
    [lambdaisland.log4j2 :as log]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.charred :as muuntaja-charred]
@@ -12,7 +12,7 @@
    [reitit.ring.middleware.muuntaja :as reitit-muuntaja]
    [reitit.ring.middleware.parameters :as reitit-params]))
 
-(require 'co.gaiwan.pure-clojure-mcp.lib.hirundo-sse)
+(require 'co.gaiwan.mcp.lib.hirundo-sse)
 
 (def malli-coercion-options
   {:error-keys #{:type :coercion :in :schema :value :errors :humanized :transformed}})

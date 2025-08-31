@@ -1,11 +1,27 @@
-(ns co.gaiwan.pure-clojure-mcp.state
-  (:require [malli.json-schema :as malli-json-schema]))
+(ns co.gaiwan.mcp.state
+  (:require
+   [malli.json-schema :as malli-json-schema]))
 
-(defonce state (atom {:sessions {}
-                      :resources {}
-                      :tools {}
-                      :resource-remplates {}
-                      :prompts {}}))
+(def protocol-version "2025-06-18")
+
+(defn initial-state []
+  {:sessions           {}
+   :resources          {}
+   :tools              {}
+   :resource-remplates {}
+   :prompts            {}
+   :protocol-version   protocol-version
+   :server-info        {:name    "Clojure MPC SDK"
+                        :title   "Pure Clojure MPC server"
+                        :version "1.0.0"}
+   :capabilities       {:logging   {}
+                        :prompts   {:listChanged true}
+                        :resources {;;:subscribe   true
+                                    :listChanged true}
+                        :tools     {:listChanged true}}
+   :instructions       ""})
+
+(defonce state (atom (initial-state)))
 
 (defn add-prompt [{:keys [name title description arguments messages-fn]}]
   (swap! state update :prompts assoc name
@@ -29,7 +45,8 @@
           :inputSchema schema
           :tool-fn tool-fn}))
 
-
+(defn set-instructions [instructions]
+  (swap! state assoc :instructions instructions))
 
 (comment
   (add-prompt
