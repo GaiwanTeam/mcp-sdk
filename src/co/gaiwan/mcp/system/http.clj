@@ -3,21 +3,23 @@
   (:require
    [lambdaisland.log4j2 :as log]
    [reitit.ring :as reitit-ring]
-   [s-exp.hirundo :as hirundo]))
+   [ring.adapter.jetty :as jetty]
+   ))
 
 (defn start [config]
   (log/info :http/starting {:port (:port config)})
   {:server
-   (hirundo/start!
+   (jetty/run-jetty
+    (reitit-ring/ring-handler
+     (:router config)
+     (reitit-ring/create-default-handler))
     {:port (:port config)
-     :http-handler/sse
-     (reitit-ring/ring-handler
-      (:router config)
-      (reitit-ring/create-default-handler))})})
+     :output-buffer-size 1
+     :join? false})})
 
 (def component
   {:start start
-   :stop (fn [o] (prn o) (hirundo/stop! (:server o)))})
+   :stop (fn [o] (.stop (:server o)))})
 
 (comment
   (user/restart! :system/http))

@@ -14,7 +14,7 @@
         {"name": "io.methvin.watcher", "level": "info"},
         {"name": "org.eclipse.aether.internal", "level": "info"},
         {"name": "org.apache.http.wire", "level": "info"},
-        {"name": "io.helidon", "level": "info"}
+        {"name": "org.eclipse.jetty", "level": "info"}
       ],
       "root": {
         "level": "debug",

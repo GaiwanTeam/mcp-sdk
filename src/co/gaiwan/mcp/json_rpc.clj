@@ -7,19 +7,21 @@
 (def internal-error -32603)   ;; Internal error 	Internal JSON-RPC error.
 
 (defn request [id method params]
-  {:jsonrpc "2.0"
-   :id id
-   :method method
-   :params params})
+  (cond-> {:jsonrpc "2.0"
+           :id id
+           :method method}
+    (seq params)
+    (assoc :params params)))
 
 (defn notification
   ([method]
    {:jsonrpc "2.0"
     :method method})
   ([method params]
-   {:jsonrpc "2.0"
-    :method method
-    :params params}))
+   (cond-> {:jsonrpc "2.0"
+            :method method}
+     (seq params)
+     (assoc :params params))))
 
 (defn response [id result]
   {:jsonrpc "2.0"

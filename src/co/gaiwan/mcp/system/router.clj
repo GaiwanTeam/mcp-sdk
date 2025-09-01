@@ -3,6 +3,7 @@
   (:require
    [co.gaiwan.mcp.config :as config]
    [co.gaiwan.mcp.http-api :as api]
+   [co.gaiwan.mcp.lib.ring-sse :as ring-sse]
    [lambdaisland.log4j2 :as log]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.charred :as muuntaja-charred]
@@ -11,8 +12,6 @@
    [reitit.ring.coercion :as ring-coercion]
    [reitit.ring.middleware.muuntaja :as reitit-muuntaja]
    [reitit.ring.middleware.parameters :as reitit-params]))
-
-(require 'co.gaiwan.mcp.lib.hirundo-sse)
 
 (def malli-coercion-options
   {:error-keys #{:type :coercion :in :schema :value :errors :humanized :transformed}})
@@ -96,7 +95,8 @@
                     ring-coercion/coerce-response-middleware
                     ring-coercion/coerce-request-middleware
                     wrap-log
-                    wrap-mcp-headers]}})))
+                    wrap-mcp-headers
+                    ring-sse/wrap-sse]}})))
 
 (comment
   (user/restart!)

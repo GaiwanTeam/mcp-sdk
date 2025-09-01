@@ -6,10 +6,9 @@
 
   ;; Logging
   com.lambdaisland/log4j2                  {:mvn/version "0.2.6"}
-  io.helidon.logging/helidon-logging-log4j {:mvn/version "4.3.0-M1"}
 
   ;; HTTP
-  com.s-exp/hirundo           {:mvn/version "0.1.43"}
+  ring/ring-jetty-adapter {:mvn/version "1.14.2"}
   metosin/reitit-ring         {:mvn/version "0.9.1"}
   metosin/reitit-middleware   {:mvn/version "0.9.1"}
   metosin/muuntaja            {:mvn/version "0.6.11"}
@@ -18,7 +17,7 @@
 
   ;; Formats and utilities
   com.cnuernber/charred {:mvn/version "1.037"}
-  io.helidon.webserver/helidon-webserver-sse {:mvn/version "4.3.0-M2"}}
+  }
 
  :aliases
  {:dev

@@ -2,7 +2,8 @@
 
 (defn go []
   (try
-    ((requiring-resolve 'co.gaiwan.mcp.config/start!))
+    ((requiring-resolve 'co.gaiwan.mcp.config/start!) [:system/http
+                                                       :system/watch-state])
     (catch Exception e
       (println e)))
   ((requiring-resolve 'co.gaiwan.mcp.config/print-table)))
