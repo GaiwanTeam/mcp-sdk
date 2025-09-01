@@ -1,13 +1,20 @@
 (ns co.gaiwan.mcp.protocol
   (:require
    [co.gaiwan.mcp.json-rpc :as jsonrpc]
-   [lambdaisland.log4j2 :as log]))
+   [lambdaisland.log4j2 :as log])
+  (:import
+   java.util.concurrent.LinkedBlockingQueue))
+
+(defmulti handle-request (fn [request] (:method request)))
+(defmulti handle-response (fn [request] (:method request)))
+(defmulti handle-notification (fn [request] (:method request)))
 
 (defn default-conn [state session-id]
   (get-in state [:sessions session-id :connections :default]))
 
 (defn find-conn [state session-id connection-id]
-  (or (get-in state [:sessions session-id :connections connection-id])
+  (or (when (and connection-id (not= :default connection-id))
+        (get-in state [:sessions session-id :connections connection-id]))
       (default-conn state session-id)))
 
 (defn empty-response [request]
@@ -19,12 +26,15 @@
 
 (defonce req-id-counter (atom 0))
 
-;; TODO: test this, and handle response
-(defn request [{:keys [state session-id method params callback]}]
+(defn request [{:keys [state session-id connection-id method params callback] :as req}]
   (let [id (swap! req-id-counter inc)]
-    (swap! state assoc-in [:response-handlers id] callback)
-    (when-let [{:keys [emit]} (default-conn @state session-id)]
-      (emit {:data (jsonrpc/request id method params)}))))
+    (log/debug :mcp/request {:method method :session-id session-id :id id :connection-id connection-id})
+    (if-let [{:keys [emit]} (find-conn @state session-id connection-id)]
+      (do
+        (swap! state assoc-in [:requests id] req)
+        (emit {:data (jsonrpc/request id method params)}))
+      (log/warn :request/failed {:method method :session-id session-id :id id}
+                :message "no default conn found"))))
 
 (defn notify [{:keys [state session-id method params]}]
   (when-let [{:keys [emit]} (default-conn @state session-id)]
@@ -45,15 +55,21 @@
     (apply swap! (:state req) update-in [:sessions sess] f args)
     (log/warn :session-update/failed {:req req} :message "Missing session-id")))
 
-(defmulti handle-request (fn [request] (:method request)))
-(defmulti handle-notification (fn [request] (:method request)))
-
 (defmethod handle-request "initialize" [{:keys [id state session-id params] :as req}]
-  (let [{:keys [procolversion capabilities clientInfo]} params]
-    (swap-sess! req assoc
-                :procolversion procolversion
-                :capabilities capabilities
-                :clientInfo clientInfo)
+  (let [{:keys [procolversion capabilities clientInfo]} params
+        queue (LinkedBlockingQueue. 1024)]
+    (swap-sess! req
+                (fn [sess]
+                  (-> sess
+                      (update :connections
+                              assoc :default
+                              {:emit #(.put queue %)
+                               :close (fn [])
+                               :queue queue})
+                      (assoc :procolversion procolversion
+                             :capabilities capabilities
+                             :clientInfo clientInfo)))
+                )
     (let [{:keys [protocol-version capabilities server-info instructions]} @state]
       (reply
        req
@@ -71,7 +87,14 @@
           {}))
   (swap-sess! req assoc :logging params))
 
-(defmethod handle-notification "notifications/initialized" [req]
+(defmethod handle-notification "notifications/initialized" [{:keys [state session-id]}]
+  (let [capabilities (get-in @state [:sessions session-id :capabilities])]
+    (log/debug :notifications/initialized {:session-id session-id
+                                           :capabilities capabilities})
+    (when (contains? capabilities :roots)
+      (request {:state state
+                :session-id session-id
+                :method "roots/list"})))
   ;; "params"
   ;; {"requestId" "123",
   ;;  "reason" "User requested cancellation"}
@@ -138,3 +161,7 @@
               id
               {:contents [(assoc res :uri uri :text ((:load-fn res)))]}))
       (reply req (jsonrpc/error id {:code jsonrpc/invalid-params :message "Resource not found"})))))
+
+(defmethod handle-response "roots/list" [{:keys [state session-id result] :as req}]
+  (swap! state assoc-in [:sessions session-id :roots] (:roots result))
+  (empty-response req))

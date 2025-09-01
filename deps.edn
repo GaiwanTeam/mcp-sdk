@@ -1,14 +1,14 @@
 {:paths ["src" "resources"]
  :deps
  {com.lambdaisland/config {:mvn/version "0.10.37"}
-  com.lambdaisland/makina {:mvn/version "0.2.12"}
+  com.lambdaisland/makina {:mvn/version "0.3.16"}
   com.lambdaisland/cli    {:mvn/version "0.24.97"}
 
   ;; Logging
-  com.lambdaisland/log4j2                  {:mvn/version "0.2.6"}
+  com.lambdaisland/log4j2 {:mvn/version "0.2.6"}
 
   ;; HTTP
-  ring/ring-jetty-adapter {:mvn/version "1.14.2"}
+  ring/ring-jetty-adapter     {:mvn/version "1.14.2"}
   metosin/reitit-ring         {:mvn/version "0.9.1"}
   metosin/reitit-middleware   {:mvn/version "0.9.1"}
   metosin/muuntaja            {:mvn/version "0.6.11"}

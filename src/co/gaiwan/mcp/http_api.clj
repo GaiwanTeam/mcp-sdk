@@ -4,7 +4,9 @@
    [co.gaiwan.mcp.json-rpc :as json-rpc]
    [co.gaiwan.mcp.protocol :as mcp]
    [co.gaiwan.mcp.state :as state]
-   [lambdaisland.log4j2 :as log]))
+   [lambdaisland.log4j2 :as log])
+  (:import
+   (java.util.concurrent BlockingQueue)))
 
 (defn- start-sse-stream [session-id conn-id]
   (fn [emit close]
@@ -23,8 +25,9 @@
   {:parameters
    {:body [:map {:closed false}
            [:jsonrpc [:enum "2.0"]]
-           [:method string?]
+           [:method {:optional true} string?]
            [:id {:optional true} any?]
+           [:response {:optional true} [:map {:closed false}]]
            [:params {:optional true} [:or
                                       [:map {:closed false}]
                                       [:vector any?]]]]}}
@@ -32,9 +35,6 @@
   (log/info :POST (-> req :parameters :body))
   (let [{:keys [method params result id] :as rpc-req} (:body parameters)]
     (cond
-      (= "notifications/initialized" method)
-      {:status 202}
-
       (and (not mcp-session-id) (not= "initialize" method))
       {:status 400
        :body {:result {:error "Missing Mcp-Session-Id header"}}}
@@ -53,23 +53,24 @@
         (mcp/handle-notification (assoc rpc-req :state state/state :session-id mcp-session-id))
         {:status 202})
 
-      (and result id) ;; response
+      (and result mcp-session-id id) ;; response
       (do
         (log/debug :response/reply {:id id :result result})
-        (when-let [callback (get-in @state/state [:response-handlers id])]
-          (let [session-id (or mcp-session-id (str (random-uuid)))
-                conn-id (random-uuid)]
+        (when-let [req (get-in @state/state [:requests id])]
+          (let [conn-id (random-uuid)
+                handle-response (fn []
+                                  (swap! state/state update :requests dissoc id)
+                                  ((or (:callback req) mcp/handle-response)
+                                   (assoc req :state state/state :session-id mcp-session-id :connection-id conn-id :result result)))]
             (if (:sse req)
               {:status 200
-               :mcp-session-id session-id
                :sse/start-stream
                (fn [sse]
-                 ((start-sse-stream session-id conn-id) sse)
-                 (callback result))}
+                 ((start-sse-stream mcp-session-id conn-id) sse)
+                 (handle-response))}
               (do
-                (callback result)
-                {:status 200
-                 :mcp-session-id session-id})))))
+                (handle-response)
+                {:status 202})))))
 
       (and method id) ;; request
       (let [session-id (or mcp-session-id (str (random-uuid)))
@@ -92,7 +93,19 @@
     {:status 200
      :sse/handler
      (fn [emit close]
-       ((start-sse-stream mcp-session-id :default) emit (fn [_])))}
+       (future
+         (let [queue (get-in @state/state [:sessions mcp-session-id :connections :default :queue])]
+           (try
+             (loop [response (.take ^BlockingQueue queue)]
+               (log/debug :get/emitting response)
+               (emit
+                (merge {:event "message"}
+                       (update response :data charred/write-json-str)))
+               (recur (.take ^BlockingQueue queue)))
+             (catch Throwable t
+               (log/error :get-stream/broke {} :exception t))
+             (finally
+               (close))))))}
     {:status 400
      :body {:error {:code json-rpc/invalid-request
                     :message "GET request must accept text/event-stream"}}}))
