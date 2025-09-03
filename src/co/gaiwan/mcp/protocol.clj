@@ -31,7 +31,7 @@
     (log/debug :mcp/request {:method method :session-id session-id :id id :connection-id connection-id})
     (if-let [{:keys [emit]} (find-conn @state session-id connection-id)]
       (do
-        (swap! state assoc-in [:requests id] req)
+        (swap! state assoc-in [:requests id] (dissoc req :state))
         (emit {:data (jsonrpc/request id method params)}))
       (log/warn :request/failed {:method method :session-id session-id :id id}
                 :message "no default conn found"))))
@@ -68,8 +68,7 @@
                                :queue queue})
                       (assoc :procolversion procolversion
                              :capabilities capabilities
-                             :clientInfo clientInfo)))
-                )
+                             :clientInfo clientInfo))))
     (let [{:keys [protocol-version capabilities server-info instructions]} @state]
       (reply
        req
@@ -94,11 +93,7 @@
     (when (contains? capabilities :roots)
       (request {:state state
                 :session-id session-id
-                :method "roots/list"})))
-  ;; "params"
-  ;; {"requestId" "123",
-  ;;  "reason" "User requested cancellation"}
-  )
+                :method "roots/list"}))))
 
 (defmethod handle-notification "notifications/cancelled" [req]
   ;; "params"
@@ -119,7 +114,7 @@
   (let [{:keys [name arguments]} params
         {:keys [tool-fn]} (get-in @state [:tools name])]
     (if tool-fn
-      (reply req (jsonrpc/response id (tool-fn arguments)))
+      (reply req (jsonrpc/response id (tool-fn req arguments)))
       (reply req (jsonrpc/error id {:code jsonrpc/invalid-params :message "Tool not found"}))))  )
 
 (defmethod handle-request "prompts/list" [{:keys [id state session-id params] :as req}]
