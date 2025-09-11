@@ -5,7 +5,7 @@
    [lambdaisland.config.cli :as config-cli]
    [lambdaisland.makina.app :as app]))
 
-(def prefix "clojure_mcp")
+(def prefix "mcp-clj-sdk")
 
 (defonce cli-opts (atom {}))
 
