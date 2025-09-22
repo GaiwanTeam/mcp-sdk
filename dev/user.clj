@@ -23,3 +23,6 @@
 
 (defn restart! [& ks]
   ((requiring-resolve 'co.gaiwan.mcp.config/restart!) ks))
+
+(defn print-table []
+  ((requiring-resolve 'co.gaiwan.mcp.config/print-table)))
