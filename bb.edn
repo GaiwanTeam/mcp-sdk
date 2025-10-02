@@ -1,1 +1,3 @@
-{:deps {com.lambdaisland/launchpad {:mvn/version "0.44.193-alpha"}}}
+{:deps {com.lambdaisland/launchpad {:mvn/version "0.45.201-alpha"}
+        lambdaisland/open-source  {:git/url "https://github.com/lambdaisland/open-source"
+                                   :git/sha "35d8c7eb1c05d18af3e7d04d65211af0f679595c"}}}

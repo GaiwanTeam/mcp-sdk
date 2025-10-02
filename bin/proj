@@ -4,9 +4,12 @@
 
 (lioss/main
  {:license        :apache
+  :org-url        "https://gaiwan.co"
+  :org-name       "Gaiwan"
   :group-id       "co.gaiwan"
   :inception-year 2025
-  :description    "Clojure wrapper for Jesque"})
+  :description    "Library for creating MCP servers"
+  })
 
 ;; Local Variables:
 ;; mode:clojure
