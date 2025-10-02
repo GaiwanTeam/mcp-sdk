@@ -1,8 +1,6 @@
 {:paths ["src" "resources"]
  :deps
- {com.lambdaisland/config {:mvn/version "0.10.37"}
-  com.lambdaisland/makina {:mvn/version "0.3.16"}
-  com.lambdaisland/cli    {:mvn/version "0.24.97"}
+ {com.lambdaisland/cli    {:mvn/version "0.24.97"}
 
   ;; Logging
   com.lambdaisland/log4j2 {:mvn/version "0.2.6"}

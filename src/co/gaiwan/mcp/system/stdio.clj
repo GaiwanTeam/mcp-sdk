@@ -5,7 +5,7 @@
    [co.gaiwan.mcp.state :as state]
    [lambdaisland.log4j2 :as log]))
 
-(defn component [_]
+(defn start! []
   (swap! state/state assoc-in [:sessions :stdio :connections :default]
          {:emit #(do
                    (log/debug :emit %)

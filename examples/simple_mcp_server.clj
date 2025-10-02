@@ -11,7 +11,6 @@
   :description "Sends a personalized greeting"
   :schema (mjs/transform [:map [:name string?]])
   :tool-fn (fn [req {:keys [name]}]
-             (def req req)
              {:content [{:type "text" :text (str "Hello, " name "!")}]
               :isError false})})
 
@@ -26,4 +25,5 @@
                    :content {:type "text"
                              :text (str "Rate this joke from 1-5:\n\n" joke)}}])})
 
-(mcp/run-http {:port 3999})
+#_(mcp/run-stdio! {})
+(mcp/run-http! {:port 3999})

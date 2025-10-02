@@ -1,7 +1,6 @@
 (ns co.gaiwan.mcp.system.router
   "HTTP router and middleware setup"
   (:require
-   [co.gaiwan.mcp.config :as config]
    [co.gaiwan.mcp.http-api :as api]
    [co.gaiwan.mcp.lib.ring-sse :as ring-sse]
    [lambdaisland.log4j2 :as log]
@@ -28,7 +27,7 @@
   (if (var? handler)
     (merge
      (cond-> verb-data
-       (not (config/get :dev/route-var-handlers))
+       false #_(not (config/get :dev/route-var-handlers))
        (update :handler deref))
      (meta handler))
     verb-data))
@@ -77,7 +76,7 @@
                                       :headers (:headers res)})
         res))))
 
-(defn component [_opts]
+(defn router []
   (let [routes (into ["" {}
                       ["/ping" {:get (constantly {:status 200 :body "pong"})}]]
                      (api/routes))]
@@ -97,8 +96,3 @@
                     wrap-log
                     wrap-mcp-headers
                     ring-sse/wrap-sse]}})))
-
-(comment
-  (user/restart!)
-  (user/restart! :system/router)
-  )

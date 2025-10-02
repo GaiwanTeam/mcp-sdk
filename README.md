@@ -16,98 +16,48 @@ STDIO and HTTP transports.
 Add to your `deps.edn`:
 
 ```clojure
-{:deps {co.gaiwan/mcp-sdk {:git/url "https://github.com/gaiwan/mcp-sdk"
-                          :sha "..."}}}
+{:deps {co.gaiwan/mcp-sdk {:mvn/version "0.0.0}}}
 ```
 
 Create a simple MCP server:
 
 ```clojure
-(ns my-mcp-server
-  (:require 
-    [co.gaiwan.mcp.state :as mcp]
-    [malli.json-schema :as mjs]))
+(ns simple-mcp-server
+  (:require
+   [co.gaiwan.mcp :as mcp]
+   [co.gaiwan.mcp.state :as state]
+   [malli.json-schema :as mjs]))
 
 ;; Add a tool
-(mcp/add-tool
-  {:name "greet"
-   :title "Greeting Tool"
-   :description "Sends a personalized greeting"
-   :schema (mjs/transform [:map [:name string?]])
-   :tool-fn (fn [{:keys [name]}]
-              {:content [{:type "text" :text (str "Hello, " name "!")}]
-               :isError false})})
+(state/add-tool
+ {:name "greet"
+  :title "Greeting Tool"
+  :description "Sends a personalized greeting"
+  :schema (mjs/transform [:map [:name string?]])
+  :tool-fn (fn [req {:keys [name]}]
+             {:content [{:type "text" :text (str "Hello, " name "!")}]
+              :isError false})})
 
 ;; Add a prompt
-(mcp/add-prompt
-  {:name "joke-rating"
-   :title "Joke Rater"
-   :description "Rate how funny a joke is"
-   :arguments [{:name "joke" :description "The joke to rate" :required true}]
-   :messages-fn (fn [{:keys [joke]}]
-                  [{:role "user"
-                    :content {:type "text"
+(state/add-prompt
+ {:name "joke-rating"
+  :title "Joke Rater"
+  :description "Rate how funny a joke is"
+  :arguments [{:name "joke" :description "The joke to rate" :required true}]
+  :messages-fn (fn [req {:keys [joke]}]
+                 [{:role "user"
+                   :content {:type "text"
                              :text (str "Rate this joke from 1-5:\n\n" joke)}}])})
-```
 
-Run the server:
-
-```bash
-# STDIO mode (for CLI tools)
-clj -M -m co.gaiwan.mcp stdio
-
-# HTTP mode (for web applications)
-clj -M -m co.gaiwan.mcp http --port 3000
-```
-
-## Core Concepts
-
-### State Management
-
-The `co.gaiwan.mcp.state` namespace provides atomic state management for:
-- **Tools**: Callable functions with input schemas
-- **Prompts**: Template messages for LLM interactions
-- **Resources**: External content accessible via URIs
-- **Sessions**: Client connection state
-
-### Protocol Handlers
-
-The `co.gaiwan.mcp.protocol` namespace implements MCP request/response handling:
-- `initialize` - Session setup and capability negotiation
-- `tools/list`, `tools/call` - Tool discovery and execution
-- `prompts/list`, `prompts/get` - Prompt management
-- `resources/list`, `resources/read` - Resource access
-
-### Transport Layers
-
-- **STDIO**: `co.gaiwan.mcp.system.stdio` - JSON-RPC over standard input/output
-- **HTTP**: `co.gaiwan.mcp.system.http` - RESTful API with SSE support
-- **Router**: `co.gaiwan.mcp.system.router` - Request routing and middleware
-
-## Configuration
-
-Server configuration uses Lambdaisland/config with multiple sources:
-
-```clojure
-;; config.edn
-{:system/http {:port 3000}
- :dev/route-var-handlers true}
-```
-
-Environment variables:
-```bash
-CLOJURE_MCP_SYSTEM_HTTP_PORT=3000
+#_(mcp/run-stdio! {})
+(mcp/run-http! {:port 3999})
 ```
 
 ## Development
 
-Start a development server:
-
-```clojure
-;; In REPL
-(user/go)  ; Start HTTP server
-(user/refresh)  ; Reload changed namespaces
-```
+This library uses [Launchpad](https://github.com/github/launchpad), use
+`bin/launchpad` to start a development process/REPL. See the Launchpad README
+for how to customize your `deps.local.edn`.
 
 ## License
 

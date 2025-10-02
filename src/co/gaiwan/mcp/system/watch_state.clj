@@ -1,4 +1,5 @@
 (ns co.gaiwan.mcp.system.watch-state
+  "Emit notifications when tools/prompts/resources change"
   (:require
    [co.gaiwan.mcp.protocol :as mcp]
    [co.gaiwan.mcp.state :as state]))
@@ -20,5 +21,5 @@
                    :session-id sid
                    :method "notifications/tools/list_changed"}))))
 
-(defn component [_]
+(defn start! [opts]
   (add-watch state/state ::notify-changes watch))

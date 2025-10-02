@@ -1,8 +1,0 @@
-#!/bin/bash
-
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
-cd $SCRIPT_DIR/..
-mkdir -p logs
-touch logs/in.txt logs/out.txt
-tee -a logs/in.txt | bin/clj_mcp stdio | tee -a logs/out.txt
