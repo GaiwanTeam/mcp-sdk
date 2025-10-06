@@ -1,3 +1,11 @@
+# Unreleased
+
+## Added
+
+## Fixed
+
+## Changed
+
 # 0.2.17 (2025-10-06 / 8dd36a0)
 
 ## Fixed

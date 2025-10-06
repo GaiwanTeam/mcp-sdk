@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>co.gaiwan</groupId>
   <artifactId>mcp-sdk</artifactId>
-  <version>0.1.13</version>
+  <version>0.2.17</version>
   <name>mcp-sdk</name>
   <description>Library for creating MCP servers</description>
   <url>https://github.com/GaiwanTeam/mcp-sdk</url>
@@ -25,7 +25,7 @@
     <url>https://github.com/GaiwanTeam/mcp-sdk</url>
     <connection>scm:git:git://github.com/GaiwanTeam/mcp-sdk.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/GaiwanTeam/mcp-sdk.git</developerConnection>
-    <tag>d57ba1eeb5e4a4f33ecec6c6033917232df13015</tag>
+    <tag>dcc55635eb2bb4eb235287e54229eae34057657a</tag>
   </scm>
   <dependencies>
     <dependency>
@@ -101,7 +101,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <git-revision>d57ba1eeb5e4a4f33ecec6c6033917232df13015</git-revision>
+              <git-revision>dcc55635eb2bb4eb235287e54229eae34057657a</git-revision>
             </manifestEntries>
           </archive>
         </configuration>
