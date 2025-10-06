@@ -14,5 +14,5 @@
 (defn run-stdio!
   "Run STDIO based MCP server"
   [opts]
-  (http/start! opts)
+  (stdio/start! opts)
   (watch/start! opts))
