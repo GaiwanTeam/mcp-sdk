@@ -16,7 +16,7 @@ STDIO and HTTP transports.
 Add to your `deps.edn`:
 
 ```clojure
-{:deps {co.gaiwan/mcp-sdk {:mvn/version "0.0.0"}}}
+{:deps {co.gaiwan/mcp-sdk {:mvn/version "0.2.17"}}}
 ```
 
 Create a simple MCP server:
