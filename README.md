@@ -55,7 +55,7 @@ Create a simple MCP server:
 
 ## Development
 
-This library uses [Launchpad](https://github.com/github/launchpad), use
+This library uses [Launchpad](https://github.com/lambdaisland/launchpad), use
 `bin/launchpad` to start a development process/REPL. See the Launchpad README
 for how to customize your `deps.local.edn`.
 
